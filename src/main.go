@@ -38,17 +38,6 @@ func main() {
 	)
 	flag.Parse()
 
-	// path := ""
-
-	// if strings.HasPrefix(*history_file, "~/") {
-	// 	dirname, _ := os.UserHomeDir()
-	// 	path = filepath.Join(dirname, (*history_file)[2:])
-	// } else {
-	// 	path, _ = filepath.Abs(*history_file)
-	// }
-	// fmt.Println(*history_file)
-	// fmt.Println(path)
-
 	fmt.Println("ファイル読み取り処理を開始します")
 
 	f, err := os.Open(*history_file)
