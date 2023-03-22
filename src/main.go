@@ -33,7 +33,8 @@ func get_shell() string {
 
 func main() {
 	var (
-		history_file = flag.String("f", "default", "history file path")
+		history_file = flag.String("f", "default", "input history file path")
+		output_file  = flag.String("o", "output.txt", "output history file path")
 	)
 	flag.Parse()
 
@@ -91,7 +92,7 @@ func main() {
 		return sdata[i] < sdata[j]
 	})
 
-	file2, err := os.Create("./output.txt")
+	file2, err := os.Create(*output_file)
 
 	if err != nil {
 		panic(err)
