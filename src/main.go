@@ -99,10 +99,8 @@ func main() {
 
 	defer file2.Close()
 
-	// re4 := regexp.MustCompile("\\")
-
 	for _, v := range sdata {
-		v = strings.ReplaceAll(v, "\\", "\\\n")
+		v = strings.ReplaceAll(v, sep, sep+"\n")
 
 		file2.WriteString(v)
 		file2.WriteString("\n")
