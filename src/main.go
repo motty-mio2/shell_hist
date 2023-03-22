@@ -53,7 +53,7 @@ func main() {
 	f, err := os.Open(*history_file)
 
 	if err != nil {
-		fmt.Println("error")
+		panic(err)
 	}
 	// 関数が終了した際に確実に閉じるようにする
 	defer f.Close()
@@ -94,7 +94,7 @@ func main() {
 	file2, err := os.Create("./output.txt")
 
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	defer file2.Close()
