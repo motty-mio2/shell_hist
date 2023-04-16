@@ -14,8 +14,11 @@ import (
 
 func get_shell() (string, string, string) {
 	if runtime.GOOS == "windows" {
-		histfile_path := strings.Fields("powershell (Get-PSReadlineOption).HistorySavePath")
-		return "pwsh", histfile_path[0], "`"
+		out, _ := exec.Command("powershell", "(Get-PSReadlineOption).HistorySavePath").Output()
+		target_path := strings.ReplaceAll(string(out), "\r", "")
+		target_path = strings.ReplaceAll(target_path, "\n", "")
+		return "pwsh", target_path, "`"
+		// return "pwsh", strings.ReplaceAll(string(out), "\\", "\\\\"), "`"
 	} else {
 		cmd, _ := exec.Command("echo $HISTFILE").Output()
 		fmt.Println(string(cmd))
