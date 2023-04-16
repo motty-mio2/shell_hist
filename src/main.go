@@ -12,40 +12,27 @@ import (
 	"strings"
 )
 
-func get_shell() string {
+func get_shell() (string, string, string) {
 	if runtime.GOOS == "windows" {
-		return "pwsh"
+		histfile_path := strings.Fields("powershell (Get-PSReadlineOption).HistorySavePath")
+		return "pwsh", histfile_path[0], "`"
 	} else {
 		cmd, _ := exec.Command("echo $HISTFILE").Output()
 		fmt.Println(string(cmd))
 
 		shell := strings.Split(os.Getenv("SHELL"), "/")
 		sh := shell[len(shell)-1]
-		return sh
-		// if strings.Contains(shell, "zsh") {
-		// 	return map[string]string{"shell": "zsh", "file": os.Getenv("HISTFILE")}
-		// } else if strings.Contains(shell, "bash") {
-		// } else {
-		// 	return map[string]string{}
-		// }
+		return sh, os.Getenv("HISTFILE"), "\\"
 	}
 }
 
-func main() {
-	var (
-		history_file = flag.String("f", "default", "input history file path")
-		output_file  = flag.String("o", "output.txt", "output history file path")
-	)
-	flag.Parse()
-
-	fmt.Println("ファイル読み取り処理を開始します")
-
-	f, err := os.Open(*history_file)
+func read_and_replace(history_file string, sep string) []string {
+	f, err := os.Open(history_file)
 
 	if err != nil {
 		panic(err)
 	}
-	// 関数が終了した際に確実に閉じるようにする
+
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
@@ -53,8 +40,6 @@ func main() {
 	re1 := regexp.MustCompile("^ +")
 	re2 := regexp.MustCompile(" +$")
 	re3 := regexp.MustCompile(" +")
-
-	sep := map[string]string{"pwsh": "`", "zsh": "\\", "bash": "\\"}[get_shell()]
 
 	stock := ""
 
@@ -81,19 +66,47 @@ func main() {
 		return sdata[i] < sdata[j]
 	})
 
-	file2, err := os.Create(*output_file)
+	return sdata
+}
+func save_history_file(output_file string, data []string, sep string) {
+	saved_file, err := os.Create(output_file)
 
 	if err != nil {
 		panic(err)
 	}
 
-	defer file2.Close()
+	defer saved_file.Close()
 
-	for _, v := range sdata {
+	for _, v := range data {
 		v = strings.ReplaceAll(v, sep, sep+"\n")
 
-		file2.WriteString(v)
-		file2.WriteString("\n")
+		saved_file.WriteString(v)
+		saved_file.WriteString("\n")
 
 	}
+}
+
+func main() {
+	var (
+		history_file = flag.String("f", "", "input history file path")
+		output_file  = flag.String("o", "", "output history file path")
+		shell        = flag.String("s", "", "select shell (bash, zsh, pwsh)")
+	)
+	flag.Parse()
+
+	tmp_shell, tmp_history_file, separte_string := get_shell()
+	if *shell == "" {
+		*shell = tmp_shell
+	}
+
+	if *history_file == "" {
+		*history_file = tmp_history_file
+	}
+
+	if *output_file == "" {
+		*output_file = *history_file
+	}
+
+	sdata := read_and_replace(*history_file, separte_string)
+	save_history_file(*output_file, sdata, separte_string)
 }
