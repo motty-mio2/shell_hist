@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
@@ -20,12 +19,14 @@ func get_shell() (string, string, string) {
 		return "pwsh", target_path, "`"
 		// return "pwsh", strings.ReplaceAll(string(out), "\\", "\\\\"), "`"
 	} else {
-		cmd, _ := exec.Command("echo $HISTFILE").Output()
-		fmt.Println(string(cmd))
+		shell_path := os.Getenv("SHELL")
 
-		shell := strings.Split(os.Getenv("SHELL"), "/")
-		sh := shell[len(shell)-1]
-		return sh, os.Getenv("HISTFILE"), "\\"
+		t := strings.Split(shell_path, "/")
+		sh := t[len(t)-1]
+
+		home_dir, _ := os.UserHomeDir()
+		target_path := home_dir + "/." + sh + "_history"
+		return sh, string(target_path), "\\"
 	}
 }
 
